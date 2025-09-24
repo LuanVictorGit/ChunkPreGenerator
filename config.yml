@@ -1,0 +1,12 @@
+# chunkpregenerator.adm - permission to command.
+# config your plugin here ;)
+Config:
+
+    # tag of your plugin.
+    tag: "&6[Chunk]"
+    
+    # put here the total chunks load on tick (50ms)
+    chunks_per_tick: 5
+    
+    # put here the max bordersize (do not put higher values 1M for example)
+    max_border_size: 2000

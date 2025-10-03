@@ -3,7 +3,6 @@ package me.chunkpregenerator;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
 
 import lombok.Getter;
 import me.chunkpregenerator.commands.CommandChunkPreGenerator;
@@ -16,10 +15,11 @@ import me.chunkpregenerator.utils.tasks.TaskWorld;
 public class Core extends JavaPlugin {
 
 	@Getter private static Core instance;
+	@SuppressWarnings("deprecation")
 	private String tag, version = "§dv" + getDescription().getVersion();
 	private Manager manager;
 	private ConfigManager configManager;
-	private BukkitTask task;
+	private java.util.Timer task;
 	private TaskWorld taskWorld;
 	
 	@Override
@@ -54,7 +54,8 @@ public class Core extends JavaPlugin {
 		manager.getTasks().add(taskWorld);
 		
 		if (task != null) task.cancel();
-		task = new Timer().runTaskTimerAsynchronously(this, 0, 1);
+		task = new java.util.Timer();
+		task.scheduleAtFixedRate(new Timer(), 0, 50);
 	}
 	
 	private void sendConsole(String msg) {Bukkit.getConsoleSender().sendMessage(msg.replace("&", "§"));}

@@ -28,28 +28,30 @@ public class TaskWorld extends Task {
 		super(()-> {
 			
 			for (int i = 0; i < config.getChunks_per_tick(); i++) {
-				if (world == null || chunks.isEmpty()) return;
-				
-				int[] coordinates = chunks.poll();
-				int x = coordinates[0];
-				int z = coordinates[1];
-				
-				int percent = totalToGenerate == 0 ? 100 : totalGenerated * 100 / totalToGenerate;
-				Bukkit.getConsoleSender().sendMessage("§7Generated §f" + totalGenerated + " §7of §f" + totalToGenerate + " chunks §6["+percent+"%] §3" + world.getName() + " §2[X:"+x + ",Z:"+z+"]");
-				
-				Task.run(()-> {
-					
-					Chunk chunk = world.getChunkAt(x, z);
-					if (!chunk.isLoaded()) {
-						chunk.load(true);
-						chunk.unload(true, true);
-					}
-					
-				});
-				
-				totalGenerated++;
-				
+			    if (world == null || chunks.isEmpty()) return;
+
+			    int[] coordinates = chunks.poll();
+			    int x = coordinates[0];
+			    int z = coordinates[1];
+
+			    int percent = totalToGenerate == 0 ? 100 : totalGenerated * 100 / totalToGenerate;
+			    Bukkit.getConsoleSender().sendMessage("§7Generated §f" + totalGenerated + " §7of §f" + totalToGenerate + " chunks §6["+percent+"%] §3" + world.getName() + " §2[X:"+x + ",Z:"+z+"]");
+
+			    Task.run(() -> {
+			        Chunk chunk = world.getChunkAt(x, z);
+			        if (!chunk.isLoaded()) {
+			            chunk.load(true);
+			            chunk.unload(false);
+			        }
+			    });
+
+			    totalGenerated++;
+
+			    if (chunks.isEmpty()) {
+			        Bukkit.getConsoleSender().sendMessage("§aPregeneration complete for world " + world.getName() + "!");
+			    }
 			}
+			
 		});
 	}
 	

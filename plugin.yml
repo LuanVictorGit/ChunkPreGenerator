@@ -1,9 +1,12 @@
 name: ChunkPreGenerator
 author: lHawk_
-version: 0.1
+version: 0.2
 main: me.chunkpregenerator.Core
 description: Pré-gera chunks no seu mundo com eficiência.
-api-version: 1.13 # Compatível com 1.8.9, mas especificado para evitar warnings
+api-version: 1.13
 load: STARTUP
+folia-supported: true
 commands:
-    chunkpregenerator:
+  chunkpregenerator:
+    description: Comando principal para pré-geração de chunks.
+    usage: /<command>

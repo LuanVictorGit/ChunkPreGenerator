@@ -1,11 +1,11 @@
 package me.chunkpregenerator.utils;
-import org.bukkit.scheduler.BukkitRunnable;
+import java.util.TimerTask;
 
 import lombok.Getter;
 import me.chunkpregenerator.objects.Manager;
 
 @Getter
-public class Timer extends BukkitRunnable {
+public class Timer extends TimerTask {
 
 	private final Manager manager = Manager.get();
 	

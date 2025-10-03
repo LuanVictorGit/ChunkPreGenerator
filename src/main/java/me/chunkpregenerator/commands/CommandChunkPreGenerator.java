@@ -33,7 +33,6 @@ public class CommandChunkPreGenerator implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
-            // Comando help
             sender.sendMessage(tag + " §e--- ChunkPreGenerator Help ---");
             sender.sendMessage("§e/chunkpregenerator reload §7- Reload the plugin.");
             sender.sendMessage("§e/chunkpregenerator generate <world> §7- Set a world to pregenerate chunks.");
@@ -54,7 +53,7 @@ public class CommandChunkPreGenerator implements CommandExecutor, TabCompleter {
             if (args[0].equalsIgnoreCase("generate")) {
                 World world = Bukkit.getWorld(args[1]);
                 if (world != null) {
-                    TaskWorld.setWorld(world);
+                    TaskWorld.get().initializeWorld(world);
                     sender.sendMessage(tag + " §aYou set the world " + world.getName() + " to pregenerate, please wait.");
                     return true;
                 } else {
@@ -64,7 +63,6 @@ public class CommandChunkPreGenerator implements CommandExecutor, TabCompleter {
             }
         }
 
-        // Caso nenhum comando seja reconhecido
         sender.sendMessage(tag + " §cUnknown command! Use /chunkpregenerator help.");
         return false;
     }
@@ -72,7 +70,7 @@ public class CommandChunkPreGenerator implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (!sender.hasPermission("chunkpregenerator.adm")) {
-            return null; // sem permissões, não mostra sugestões
+            return null;
         }
 
         if (args.length == 1) {

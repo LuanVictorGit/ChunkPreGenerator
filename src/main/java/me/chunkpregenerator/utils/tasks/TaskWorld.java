@@ -1,7 +1,10 @@
 package me.chunkpregenerator.utils.tasks;
+
 import java.util.Queue;
+
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -18,63 +21,111 @@ import me.chunkpregenerator.utils.Task;
 @Setter
 public class TaskWorld extends Task {
 
-	private static World world;
-	private static ConfigManager config = ConfigManager.get();
-	private static final Queue<int[]> chunks = new ConcurrentLinkedQueue<>();
-	private static int totalToGenerate;
-	private static int totalGenerated;
-	
-	public TaskWorld() {
-		super(()-> {
-			
-			for (int i = 0; i < config.getChunks_per_tick(); i++) {
-			    if (world == null || chunks.isEmpty()) return;
+    private World world;
+    private long lastExecuted;
+    private final ConfigManager config = ConfigManager.get();
+    private final Queue<int[]> chunks = new ConcurrentLinkedQueue<>();
+    private int totalToGenerate;
+    private int totalGenerated;
+    private boolean canExecute = true;
 
-			    int[] coordinates = chunks.poll();
-			    int x = coordinates[0];
-			    int z = coordinates[1];
+    public TaskWorld() {
+        super(()-> {});
+        setRunnable(() -> {
+        	
+        	long currentTime = System.currentTimeMillis();
+        	if (currentTime-lastExecuted < config.getTimePerChunk()) return;
+        	lastExecuted = currentTime;
+        	
+            if (world == null || chunks.isEmpty() || !canExecute) {
+                return;
+            }
+            
+            canExecute = false;
+            Task.run(()-> {
+            	for (int i = 0; i < config.getChunks_per_tick(); i++) {
+                    if (chunks.isEmpty()) break;
 
-			    int percent = totalToGenerate == 0 ? 100 : totalGenerated * 100 / totalToGenerate;
-			    Bukkit.getConsoleSender().sendMessage("§7Generated §f" + totalGenerated + " §7of §f" + totalToGenerate + " chunks §6["+percent+"%] §3" + world.getName() + " §2[X:"+x + ",Z:"+z+"]");
+                    int[] coordinates = chunks.poll();
+                    if (coordinates == null) continue;
 
-			    Task.run(() -> {
-			        Chunk chunk = world.getChunkAt(x, z);
-			        if (!chunk.isLoaded()) {
-			            chunk.load(true);
-			            chunk.unload(false);
-			        }
-			    });
+                    int x = coordinates[0];
+                    int z = coordinates[1];
 
-			    totalGenerated++;
+                    int percent = totalToGenerate == 0 ? 0 : (totalGenerated * 100) / totalToGenerate;
+                    Bukkit.getConsoleSender().sendMessage(
+                        String.format("§7Generated §f%d §7of §f%d chunks §6[%d%%] §3%s §2[X:%d, Z:%d]",
+                            totalGenerated, totalToGenerate, percent, world.getName(), x, z)
+                    );
+                    
+                    Task.runForChunk(world, x, z, ()-> {
+                    	try {
+                        	Chunk chunk = world.getChunkAt(x, z);
+                        	if (!chunk.isLoaded()) {
+                        		chunk.load(true);
+                        		chunk.unload(false);
+                        	}
+                        } catch (Exception e) {
+                        	Bukkit.getConsoleSender().sendMessage(
+                        			"§cError generating chunk at [X:" + x + ", Z:" + z + "]: " + e.getMessage()
+                        	);
+                        }
+                    });
 
-			    if (chunks.isEmpty()) {
-			        Bukkit.getConsoleSender().sendMessage("§aPregeneration complete for world " + world.getName() + "!");
-			    }
-			}
-			
-		});
-	}
-	
-	public static void setWorld(World world) {
-		Task.run(()-> {
-			TaskWorld.world = world;
-			chunks.clear();
-			
-			if (world.getWorldBorder().getSize() > ConfigManager.get().getMax_border_size()) {
-				world.getWorldBorder().setSize(ConfigManager.get().getMax_border_size());
-			}
-			
-			Task.runAsync(()-> {
-				chunks.addAll(ChunkUtils.streamChunksOfWorld(world).collect(Collectors.toList()));
-				
-				totalToGenerate = chunks.size()-1;
-				totalGenerated = 0;
-			});
-		});
-	}
-	
-	public static TaskWorld get() {
-		return Core.getInstance().getTaskWorld();
-	}
-	
+                    totalGenerated++;
+
+                    if (chunks.isEmpty()) {
+                        Bukkit.getConsoleSender().sendMessage(
+                            "§aPregeneration completed for world " + world.getName() + "! " +
+                            "Total: " + totalGenerated + " chunks"
+                        );
+                        reset();
+                        break;
+                    }
+                }
+            	canExecute = true;
+            });
+            
+        });
+    }
+
+    public void initializeWorld(World world) {
+        reset();
+        this.world = world;
+
+        Task.run(() -> {
+            if (world == null) {
+                Bukkit.getConsoleSender().sendMessage("§cInvalid world for pregeneration!");
+                return;
+            }
+
+            double borderSize = world.getWorldBorder().getSize();
+            if (borderSize > config.getMax_border_size()) {
+                world.getWorldBorder().setSize(config.getMax_border_size());
+                Bukkit.getConsoleSender().sendMessage(
+                    "§eWorld border adjusted to " + config.getMax_border_size() + " blocks."
+                );
+            }
+
+            Task.runAsync(() -> {
+                Stream<int[]> chunkStream = ChunkUtils.streamChunksOfWorld(world);
+                this.chunks.addAll(chunkStream.collect(Collectors.toList()));
+                
+                totalToGenerate = this.chunks.size()-1;
+                
+                Bukkit.getConsoleSender().sendMessage(
+                        "§aTotal chunks to generate: " + totalToGenerate
+                );
+            });
+        });
+    }
+
+    private void reset() {
+        this.totalToGenerate = 0;
+        this.totalGenerated = 0;
+    }
+
+    public static TaskWorld get() {
+        return Core.getInstance().getTaskWorld();
+    }
 }

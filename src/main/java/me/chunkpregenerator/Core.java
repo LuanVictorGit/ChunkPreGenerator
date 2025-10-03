@@ -55,7 +55,7 @@ public class Core extends JavaPlugin {
 		
 		if (task != null) task.cancel();
 		task = new java.util.Timer();
-		task.scheduleAtFixedRate(new Timer(), 0, 50);
+		task.scheduleAtFixedRate(new Timer(), 0, 1);
 	}
 	
 	private void sendConsole(String msg) {Bukkit.getConsoleSender().sendMessage(msg.replace("&", "§"));}

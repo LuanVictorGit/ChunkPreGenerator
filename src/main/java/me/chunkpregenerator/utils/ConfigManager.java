@@ -11,12 +11,14 @@ public class ConfigManager {
 
 	private final int chunks_per_tick;
 	private final int max_border_size;
+	private final int timePerChunk;
 	
 	public ConfigManager() {
 		
 		FileConfiguration config = Core.getInstance().getConfig();
 		ConfigurationSection section = config.getConfigurationSection("Config");
 		
+		timePerChunk = section.getInt("timePerChunk");
 		max_border_size = section.getInt("max_border_size");
 		chunks_per_tick = section.getInt("chunks_per_tick");
 		

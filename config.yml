@@ -8,5 +8,8 @@ Config:
     # put here the total chunks load on tick (50ms)
     chunks_per_tick: 5
     
+    # put here the time in milliseconds.
+    timePerChunk: 50
+    
     # put here the max bordersize (do not put higher values 1M for example)
-    max_border_size: 2000
+    max_border_size: 5000

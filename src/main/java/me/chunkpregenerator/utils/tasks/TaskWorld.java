@@ -43,6 +43,9 @@ public class TaskWorld extends Task {
             
             canExecute = false;
             Task.run(()-> {
+            	
+            	int lastX = 0;
+            	int lastZ = 0;
             	for (int i = 0; i < config.getChunks_per_tick(); i++) {
                     if (chunks.isEmpty()) break;
 
@@ -51,12 +54,9 @@ public class TaskWorld extends Task {
 
                     int x = coordinates[0];
                     int z = coordinates[1];
-
-                    int percent = totalToGenerate == 0 ? 0 : (totalGenerated * 100) / totalToGenerate;
-                    Bukkit.getConsoleSender().sendMessage(
-                        String.format("§7Generated §f%d §7of §f%d chunks §6[%d%%] §3%s §2[X:%d, Z:%d]",
-                            totalGenerated, totalToGenerate, percent, world.getName(), x, z)
-                    );
+                    
+                    lastX = x;
+                    lastZ = z;
                     
                     Task.runForChunk(world, x, z, ()-> {
                     	try {
@@ -83,6 +83,16 @@ public class TaskWorld extends Task {
                         break;
                     }
                 }
+            	
+            	if (!chunks.isEmpty()) {
+            		int percent = totalToGenerate == 0 ? 0 : (totalGenerated * 100) / totalToGenerate;
+                    Bukkit.getConsoleSender().sendMessage(
+                        String.format("§7Generated §f%d §7of §f%d chunks §6[%d%%] §3%s §2[X:%d, Z:%d]",
+                            totalGenerated, totalToGenerate, percent, world.getName(), lastX, lastZ)
+                    );
+            	}
+            	
+            	
             	canExecute = true;
             });
             

@@ -1,6 +1,6 @@
 name: ChunkPreGenerator
 author: lHawk_
-version: 0.3
+version: 0.4
 main: me.chunkpregenerator.Core
 description: Pré-gera chunks no seu mundo com eficiência.
 api-version: 1.13

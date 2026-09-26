@@ -5,10 +5,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 enum Lang {
-	EN("en", Locale.US), PT("pt", Locale.forLanguageTag("pt-BR"));
-	final String code; final Locale loc;
-	Lang(String code, Locale loc) { this.code = code; this.loc = loc; }
-	static Lang of(CommandSender s) { return of(s instanceof Player ? Compat.locale((Player) s) : Locale.getDefault().toString()); }
+	EN("en", Locale.US, "English (US)"), PT("pt", Locale.forLanguageTag("pt-BR"), "Português (Brasil)");
+	static Lang forced; final String code, label; final Locale loc;
+	Lang(String code, Locale loc, String label) { this.code = code; this.loc = loc; this.label = label; }
+	static Lang of(CommandSender s) { return forced != null ? forced : of(s instanceof Player ? Compat.locale((Player) s) : Locale.getDefault().toString()); }
+	static void next() { forced = forced == null ? values()[0] : forced.ordinal() + 1 < values().length ? values()[forced.ordinal() + 1] : null; }
+	static String options(Lang g) { StringBuilder b = new StringBuilder(); for (int i = -1; i < values().length; i++) { Lang o = i < 0 ? null : values()[i]; b.append(i < 0 ? "" : "\n").append(o == forced ? "§a» " : "§8- ").append(o == null ? g.t(T.LANG_AUTO) : o.label); } return b.toString(); }
 	static Lang of(String l) { for (Lang g : values()) if (l != null && l.toLowerCase(Locale.ROOT).startsWith(g.code)) return g; return EN; }
 	String t(T k, Object... a) { return String.format(loc, k.v[ordinal()], a); }
 	String num(long n) { return String.format(loc, "%,d", n); }
@@ -63,6 +65,9 @@ enum Lang {
 		L_AUTO("§7Mode: §f%s\n§7%s\n§7State: %s\n§8Threads, RAM, speed and simultaneous\n§8chunks are adjusted automatically.", "§7Modo: §f%s\n§7%s\n§7Estado: %s\n§8Threads, RAM, velocidade e chunks\n§8simultâneos são ajustados automaticamente."),
 		L_LIMIT("Simultaneous chunks: §f%d / %d", "Chunks simultâneos: §f%d / %d"),
 		L_BUDGET("Time per tick: §f%.1f ms", "Tempo por tick: §f%.1f ms"),
+		IT_LANG("§bLanguage / Idioma", "§bIdioma / Language"),
+		L_LANG("§7Language of the menus and messages\n§7for every player and the console.\n%s\n§eClick to change.", "§7Idioma dos menus e mensagens de\n§7todos os jogadores e do console.\n%s\n§eClique para alterar."),
+		LANG_AUTO("Automatic (game language)", "Automático (idioma do jogo)"),
 		IT_CLOSE("§cClose", "§cFechar"), IT_BACK("§eBack", "§eVoltar"), IT_PREV("§ePrevious page", "§ePágina anterior"), IT_NEXT("§eNext page", "§ePróxima página"),
 		IT_DELTA("%s §7blocks", "%s §7blocos"), IT_PRESET("§e%,d blocks", "§e%,d blocos"), IT_BORDER("§eWorld border §7(%,d blocks)", "§eBorda do mundo §7(%,d blocos)"),
 		IT_CONFIRM("§aConfirm", "§aConfirmar"), IT_CANCEL("§cCancel", "§cCancelar"),
@@ -77,6 +82,8 @@ enum Lang {
 		IT_SPEED("§aSpeed", "§aVelocidade"), L_SPEED("§f%s\n§7Processing now: §f%d chunks", "§f%s\n§7Em processamento: §f%d chunks"),
 		IT_TIME("§aTime", "§aTempo"), L_TIME("§7Elapsed: §f%s\n§7Remaining: §f%s", "§7Decorrido: §f%s\n§7Restante: §f%s"),
 		L_AREA_INFO("§7Center: §f%d, %d\n§7Radius: §f%,d blocks\n§7Shape: §f%s", "§7Centro: §f%d, %d\n§7Raio: §f%,d blocos\n§7Formato: §f%s"),
+		IT_MAP("§aArea map", "§aMapa da área"),
+		L_MAP("§a█ §7Generated  §e█ §7In progress\n§8█ §7Remaining  §b█ §7You\n§8North is up. Each square ≈ %,d chunks wide.", "§a█ §7Gerado  §e█ §7Em andamento\n§8█ §7Falta  §b█ §7Você\n§8Norte para cima. Cada quadrado ≈ %,d chunks de lado."),
 		IT_PERF("§aPerformance", "§aDesempenho"),
 		IT_PAUSE("§ePause", "§ePausar"), IT_RESUME("§aResume", "§aContinuar"), IT_REMOVE("§cRemove from list", "§cRemover da lista"),
 		L_STATUS("§7Status: %s", "§7Status: %s");

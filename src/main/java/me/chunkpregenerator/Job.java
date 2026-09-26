@@ -15,6 +15,7 @@ final class Job {
 	static long isqrt(long v) { long r = (long) Math.sqrt(v); while (r * r > v) r--; while ((r + 1) * (r + 1) <= v) r++; return r; }
 	boolean in(int x, int z) { long dx = x - ccx, dz = z - ccz; return Math.abs(x) <= LIMIT && Math.abs(z) <= LIMIT && Math.abs(dx) <= rc && Math.abs(dz) <= rc && (!circle || dx * dx + dz * dz <= (long) rc * rc); }
 	boolean future(int a, int b) { return in(a, b) && a >> 5 == rx && b >> 5 == rz; }
+	long slot(int x, int z) { long dx = (x >> 5) - rcx, dz = (z >> 5) - rcz, r = Math.max(Math.abs(dx), Math.abs(dz)); return (r == 0 ? 0 : (2 * r - 1) * (2 * r - 1) + (dx == r && dz > -r ? dz + r - 1 : dz == r ? 3 * r - 1 - dx : dx == -r ? 5 * r - 1 - dz : 7 * r - 1 + dx)) << 10 | (z & 31) << 5 | x & 31; }
 	boolean next() {
 		while (cursor < slots) {
 			long s = cursor++, k = s >> 10; int l = (int) (s & 1023);

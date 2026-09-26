@@ -91,6 +91,10 @@ public class EngineTest extends TestCase {
 		Engine.done(j, j.epoch - 1, s[0], WORLD, c[0][0], c[0][1], null); assertEquals(2, j.done); Engine.done(j, j.epoch, s[0], WORLD, c[0][0], c[0][1], null); assertEquals(3, j.ckDone); assertEquals(j.cursor, j.ckCursor); assertEquals(0, j.inflight);
 		j.next(); LOADED.add(JobTest.key(j.x, j.z)); assertFalse(Engine.async(j)); assertEquals(4, j.ckDone); LOADED.clear(); Engine.world = null;
 	}
+	public void testLanguagePersistence() throws Exception {
+		Engine.JOBS.clear(); Engine.file = File.createTempFile("generations", ".dat"); Lang.forced = Lang.EN; Engine.save(false); assertTrue(Engine.file.exists()); Lang.forced = null; Engine.load(); assertEquals(Lang.EN, Lang.forced); assertTrue(Engine.JOBS.isEmpty());
+		Lang.forced = null; Engine.save(false); assertFalse(Engine.file.exists());
+	}
 	public void testGenerationLifecycle() throws Exception {
 		assertTrue(Compat.LEGACY); assertFalse(Compat.ASYNC); assertEquals(Lang.T.M_LEGACY, Engine.mode()); Engine.JOBS.clear(); Engine.file = File.createTempFile("generations", ".dat"); assertTrue(Engine.file.delete());
 		Engine.console(CONSOLE, new String[] {"start", "world", "700"}); assertTrue(Engine.JOBS.isEmpty());

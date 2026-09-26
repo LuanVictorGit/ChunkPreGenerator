@@ -7,7 +7,7 @@ import junit.framework.TestCase;
 public class JobTest extends TestCase {
 	static final int[][] CASES = {{0, 0, 16}, {7, -9, 100}, {-5000, 7000, 300}, {1000, -1000, 700}, {-31, -31, 16}, {12345, 54321, 1000}, {-100000, -100000, 2500}, {29999000, 0, 3000}};
 	static long key(int x, int z) { return (long) x << 32 | (z & 0xffffffffL); }
-	static Set<Long> run(Job j) { Set<Long> s = new HashSet<>(); while (j.next()) { assertTrue(j.in(j.x, j.z)); assertTrue(s.add(key(j.x, j.z))); j.done++; } return s; }
+	static Set<Long> run(Job j) { Set<Long> s = new HashSet<>(); while (j.next()) { assertTrue(j.in(j.x, j.z)); assertEquals(j.cursor - 1, j.slot(j.x, j.z)); assertTrue(s.add(key(j.x, j.z))); j.done++; } return s; }
 	public void testCoverage() {
 		for (int[] c : CASES) for (boolean circle : new boolean[] {false, true}) {
 			Job j = new Job("w", c[0], c[1], c[2], circle); Set<Long> s = run(j); long n = 0;

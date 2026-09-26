@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 
 public class CompatTest extends TestCase {
 	public void testLegacyMaterials() {
-		for (String s : new String[] {Menu.PANE, Menu.YES, Menu.NO, Menu.CLOCK, Menu.AUTO, Menu.ARROW, "NETHER_STAR", "BEACON", "COMPASS", "EMERALD_BLOCK", "BOOK", "BARRIER", "PAPER", "IRON_BARS|IRON_FENCE", "RED_STAINED_GLASS_PANE|STAINED_GLASS_PANE:14", "LIME_STAINED_GLASS_PANE|STAINED_GLASS_PANE:5", "EXPERIENCE_BOTTLE|EXP_BOTTLE", "FEATHER", "REDSTONE", "YELLOW_WOOL|WOOL:4", "NETHERRACK", "END_STONE|ENDER_STONE", "GRASS_BLOCK|GRASS"}) assertNotSame(s, Material.STONE, Compat.parse(s).getType());
+		for (String s : new String[] {Menu.PANE, Menu.YES, Menu.NO, Menu.CLOCK, Menu.AUTO, Menu.ARROW, "NETHER_STAR", "BEACON", "COMPASS", "EMERALD_BLOCK", "BOOK", "BARRIER", "PAPER", "IRON_BARS|IRON_FENCE", "RED_STAINED_GLASS_PANE|STAINED_GLASS_PANE:14", "LIME_STAINED_GLASS_PANE|STAINED_GLASS_PANE:5", "EXPERIENCE_BOTTLE|EXP_BOTTLE", "FEATHER", "REDSTONE", "YELLOW_WOOL|WOOL:4", "NETHERRACK", "END_STONE|ENDER_STONE", "GRASS_BLOCK|GRASS", "FILLED_MAP|MAP", "WRITABLE_BOOK|BOOK_AND_QUILL"}) assertNotSame(s, Material.STONE, Compat.parse(s).getType());
 		assertEquals(Material.STAINED_GLASS_PANE, Compat.parse(Menu.PANE).getType()); assertEquals(7, Compat.parse(Menu.PANE).getDurability()); assertEquals(Material.STONE, Compat.parse("NOPE|NADA:3").getType());
 	}
 	public void testLegacyLocale() {

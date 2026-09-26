@@ -96,12 +96,12 @@ final class Engine {
 		switch (c) { case "pause": pause(s, j); break; case "resume": resume(s, j); break; case "cancel": cancel(s, j); break; default: msg(s, USAGE); }
 	}
 	static void load() {
-		try { if (file.exists()) for (String l : Files.readAllLines(file.toPath(), StandardCharsets.UTF_8)) { Job j = Job.parse(l); if (j != null && find(j.world) == null) JOBS.add(j); } } catch (Exception e) { log(FILE_ERROR, e); }
+		try { if (file.exists()) for (String l : Files.readAllLines(file.toPath(), StandardCharsets.UTF_8)) { Job j = Job.parse(l); if (j != null && find(j.world) == null) JOBS.add(j); for (Lang g : Lang.values()) if (l.equals("lang\t" + g)) Lang.forced = g; } } catch (Exception e) { log(FILE_ERROR, e); }
 		if (!JOBS.isEmpty()) log(RESTORED, JOBS.size());
 	}
 	static void stop() { for (Job j : JOBS) j.epoch++; save(false); JOBS.clear(); }
 	static void save(boolean async) {
-		StringBuilder b = new StringBuilder(); for (Job j : JOBS) if (j.state != Job.DONE) b.append(j.line()).append('\n');
+		StringBuilder b = new StringBuilder(Lang.forced == null ? "" : "lang\t" + Lang.forced + "\n"); for (Job j : JOBS) if (j.state != Job.DONE) b.append(j.line()).append('\n');
 		String d = b.toString(); long n = ++seq; File f = file; dirty = false;
 		if (async) Bukkit.getScheduler().runTaskAsynchronously(Core.plugin, () -> write(f, d, n)); else write(f, d, n);
 	}

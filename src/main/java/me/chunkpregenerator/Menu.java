@@ -31,6 +31,16 @@ final class Menu implements InventoryHolder {
 	static String shape(Lang g, Job j) { return g.t(j.circle ? SH_CIRCLE : SH_SQUARE); }
 	static String jobLore(Lang g, Job j) { return g.t(L_JOB, j.status(g), j.percent(), j.eta(g)); }
 	static String summary(Lang g, Job j, int center) { return g.t(L_SUMMARY, j.world, g.t(CENTERS[center]), j.cx, j.cz, j.radius, shape(g, j), j.total) + (j.total > 1000000 ? "\n" + g.t(L_HUGE) : ""); }
+	static String map(Lang g, Job j, Player p) {
+		int w = 2 * j.rc + 1, n = Math.min(15, w), x0 = j.ccx - j.rc, z0 = j.ccz - j.rc; Location l = p.getWorld().getName().equals(j.world) ? p.getLocation() : null; int px = l == null ? Integer.MIN_VALUE : l.getBlockX() >> 4, pz = l == null ? 0 : l.getBlockZ() >> 4; StringBuilder b = new StringBuilder();
+		for (int r = 0; r < n; r++, b.append('\n')) for (int c = 0, last = 0; c < n; c++) {
+			int xa = x0 + (int) ((long) c * w / n), xb = x0 + (int) ((long) (c + 1) * w / n), za = z0 + (int) ((long) r * w / n), zb = z0 + (int) ((long) (r + 1) * w / n), in = 0, done = 0, left = 0;
+			for (int s = 0; s < 9; s++) { int x = xa + (xb - xa) * (s % 3 * 2 + 1) / 6, z = za + (zb - za) * (s / 3 * 2 + 1) / 6; if (!j.in(x, z)) continue; long k = j.slot(x, z); in++; if (k < j.ckCursor) done++; else if (k >= j.cursor) left++; }
+			char col = px >= xa && px < xb && pz >= za && pz < zb ? 'b' : in == 0 ? '0' : done == in ? 'a' : left == in ? '8' : 'e';
+			if (col != last) b.append('§').append((char) (last = col)); b.append('█');
+		}
+		return b + g.t(L_MAP, (w + n - 1) / n);
+	}
 	static String bar(double pct) { int n = (int) Math.min(20, pct / 5); return "§a" + new String(new char[n]).replace('\0', '█') + "§8" + new String(new char[20 - n]).replace('\0', '█'); }
 	static void home(Player p) {
 		Menu m = new Menu(p, 3, TI_MAIN, true);
@@ -45,6 +55,7 @@ final class Menu implements InventoryHolder {
 			m.set(15, CLOCK, g.t(IT_PROGRESS), run.isEmpty() ? g.t(L_NO_ACTIVE) : jobLore(g, run.get(0)) + "\n" + g.t(L_DETAILS), c -> { List<Job> r = Engine.running(); if (r.size() == 1) job(p, r.get(0)); else jobs(p, 0); });
 			m.set(16, AUTO, g.t(IT_AUTO), Engine.auto(g), null);
 			m.set(22, "BARRIER", g.t(IT_CLOSE), null, c -> p.closeInventory());
+			m.set(26, "WRITABLE_BOOK|BOOK_AND_QUILL", g.t(IT_LANG), g.t(L_LANG, Lang.options(g)), c -> { Lang.next(); Engine.save(true); home(p); });
 		});
 	}
 	static void start(Player p, Sel s) {
@@ -88,6 +99,7 @@ final class Menu implements InventoryHolder {
 			m.set(20, "FEATHER", g.t(IT_SPEED), g.t(L_SPEED, j.speed(g), Compat.ASYNC ? j.inflight : j.state == Job.RUN ? Engine.batch : 0), null);
 			m.set(21, CLOCK, g.t(IT_TIME), g.t(L_TIME, Lang.time(j.elapsed / 1000), j.eta(g)), null);
 			m.set(22, "COMPASS", g.t(IT_AREA), g.t(L_AREA_INFO, j.cx, j.cz, j.radius, shape(g, j)), null);
+			m.set(31, "FILLED_MAP|MAP", g.t(IT_MAP), map(g, j, p), null);
 			m.set(23, "REDSTONE", g.t(IT_PERF), Engine.perf(g), null);
 			m.set(24, AUTO, g.t(IT_AUTO), Engine.auto(g), null);
 			if (j.state == Job.DONE) { m.set(38, NO, g.t(IT_REMOVE), null, c -> { Engine.remove(j); jobs(p, 0); }); return; }

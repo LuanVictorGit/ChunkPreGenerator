@@ -23,6 +23,10 @@ public class LangTest extends TestCase {
 		assertEquals(Lang.PT, Lang.of("pt_br")); assertEquals(Lang.PT, Lang.of("pt_PT")); assertEquals(Lang.PT, Lang.of("pt_BR")); assertEquals(Lang.EN, Lang.of("en_us"));
 		assertEquals(Lang.EN, Lang.of("de_de")); assertEquals(Lang.EN, Lang.of("")); assertEquals(Lang.EN, Lang.of((String) null));
 	}
+	public void testForced() {
+		assertNull(Lang.forced); assertTrue(Lang.options(Lang.PT).startsWith("§a» Automático")); Lang.next(); assertEquals(Lang.EN, Lang.forced); assertEquals(Lang.EN, Lang.of(EngineTest.PLAYER)); assertEquals(Lang.EN, Lang.of(EngineTest.CONSOLE));
+		assertTrue(Lang.options(Lang.EN).contains("§a» English (US)")); Lang.next(); assertEquals(Lang.PT, Lang.of(EngineTest.CONSOLE)); Lang.next(); assertNull(Lang.forced); assertEquals(Lang.PT, Lang.of(EngineTest.PLAYER));
+	}
 	public void testFormat() {
 		assertEquals("00:01:02", Lang.time(62)); assertEquals("1d 01:00:00", Lang.time(90000)); assertEquals("00:00:00", Lang.time(0));
 		assertEquals("1.234.567", Lang.PT.num(1234567)); assertEquals("1,234,567", Lang.EN.num(1234567)); assertEquals("§aProgresso: §f45,5%", Lang.PT.t(Lang.T.IT_BAR, 45.5));

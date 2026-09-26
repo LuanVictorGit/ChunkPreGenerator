@@ -1,0 +1,14 @@
+name: ChunkPreGenerator
+version: '${project.version}'
+main: me.chunkpregenerator.Core
+author: lHawk_
+description: Chunk pre-generator with automatic performance control and a GUI.
+api-version: '1.13'
+commands:
+  chunkpregenerator:
+    description: Opens the ChunkPreGenerator menu.
+    usage: /<command>
+permissions:
+  chunkpregenerator.admin:
+    description: Allows using ChunkPreGenerator.
+    default: op

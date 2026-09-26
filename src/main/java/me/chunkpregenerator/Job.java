@@ -4,8 +4,8 @@ import static me.chunkpregenerator.Lang.T.*;
 
 final class Job {
 	static final int RUN = 0, PAUSED = 1, DONE = 2, MAX = 29999984, LIMIT = 1875000;
-	final String world; final int cx, cz, radius, rc, ccx, ccz, rcx, rcz; final boolean circle; final long slots, total; final long[] hd = new long[20], ht = new long[20];
-	long cursor, done, elapsed, ckCursor, ckDone, rk = -1; int state = PAUSED, inflight, epoch, errors, hn, x, z, rx, rz; boolean drain;
+	final String world; final int cx, cz, radius, rc, ccx, ccz, rcx, rcz; final boolean circle; final long slots, total; final long[] hd = new long[60], ht = new long[60], win = new long[512]; final boolean[] ok = new boolean[512];
+	long cursor, done, elapsed, ckCursor, ckDone, rk = -1, head, tail; int state = PAUSED, inflight, epoch, errors, hn, x, z, rx, rz;
 	Job(String world, int cx, int cz, int radius, boolean circle) {
 		this.world = world; this.cx = cx; this.cz = cz; this.radius = radius; this.circle = circle; rc = (radius + 15) >> 4; ccx = cx >> 4; ccz = cz >> 4; rcx = ccx >> 5; rcz = ccz >> 5;
 		long r = Math.max(Math.max(rcx - ((ccx - rc) >> 5), ((ccx + rc) >> 5) - rcx), Math.max(rcz - ((ccz - rc) >> 5), ((ccz + rc) >> 5) - rcz)), n = 0;
@@ -29,12 +29,14 @@ final class Job {
 		long t = k - (2 * r - 1) * (2 * r - 1), s = t / (2 * r), o = t % (2 * r);
 		rx = (int) (rcx + (s == 0 ? r : s == 1 ? r - 1 - o : s == 2 ? -r : o + 1 - r)); rz = (int) (rcz + (s == 0 ? o + 1 - r : s == 1 ? r : s == 2 ? r - 1 - o : -r));
 	}
-	void sample(long now) { hd[hn % 20] = done; ht[hn++ % 20] = now; }
-	double speed() { int k = Math.min(hn - 1, 19), a = (hn - 1) % 20, b = (hn - 1 - k) % 20; return k < 5 ? -1 : (hd[a] - hd[b]) * 1e9 / Math.max(1, ht[a] - ht[b]); }
+	void sample(long now) { hd[hn % hd.length] = done; ht[hn++ % hd.length] = now; }
+	double speed() { int n = hd.length, k = Math.min(hn - 1, n - 1), a = (hn - 1) % n, b = (hn - 1 - k) % n; return k < 5 ? -1 : (hd[a] - hd[b]) * 1e9 / Math.max(1, ht[a] - ht[b]); }
 	long eta() { double s = speed(); return s > 0 ? (long) ((total - done) / s) : -1; }
 	double percent() { return total == 0 ? 100 : Math.min(100, done * 100.0 / total); }
-	void reset() { cursor = ckCursor; done = ckDone; inflight = 0; epoch++; drain = false; rk = -1; }
-	boolean checkpoint() { drain = false; if (ckCursor == cursor) return false; ckCursor = cursor; ckDone = done; return true; }
+	void reset() { cursor = ckCursor; done = ckDone; inflight = 0; epoch++; head = tail = 0; rk = -1; }
+	boolean full() { return tail - head >= win.length; }
+	long push() { long s = tail++; win[(int) (s & 511)] = cursor; ok[(int) (s & 511)] = false; return s; }
+	boolean complete(long s) { ok[(int) (s & 511)] = true; boolean m = false; for (; head < tail && ok[(int) (head & 511)]; head++, ckDone++, m = true) ckCursor = win[(int) (head & 511)]; return m; }
 	void error(int x, int z, Throwable t) { if (errors++ == 0) Engine.log(ERROR_MSG, x, z, world, t); }
 	String status(Lang g) { return g.t(state == RUN ? S_RUNNING : state == PAUSED ? S_PAUSED : S_DONE); }
 	String speed(Lang g) { double s = speed(); return state != RUN ? "-" : s < 0 ? g.t(CALC) : g.t(SPEED, s); }

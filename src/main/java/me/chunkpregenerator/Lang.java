@@ -37,7 +37,7 @@ enum Lang {
 		FILE_ERROR("§cCould not access generations.dat: %s", "§cNão foi possível acessar generations.dat: %s"),
 		S_RUNNING("§aGENERATING", "§aGERANDO"), S_PAUSED("§ePAUSED", "§ePAUSADO"), S_DONE("§bCOMPLETED", "§bCONCLUÍDO"),
 		H_OK("§aHealthy", "§aSaudável"), H_HIGH("§eReducing speed", "§eReduzindo velocidade"), H_CRIT("§cCritical - holding", "§cCrítico - aguardando"),
-		M_ASYNC("Paper asynchronous", "Paper assíncrono"), M_SYNC("Synchronous (time budget)", "Síncrono (orçamento de tempo)"), M_LEGACY("Legacy 1.8-1.12", "Legado 1.8-1.12"),
+		M_ASYNC("Paper asynchronous", "Paper assíncrono"), M_TICKET("Spigot asynchronous (tickets)", "Spigot assíncrono (tickets)"), M_SYNC("Synchronous (time budget)", "Síncrono (orçamento de tempo)"), M_LEGACY("Legacy 1.8-1.12", "Legado 1.8-1.12"),
 		C_SPAWN("Spawn", "Spawn"), C_PLAYER("Your position", "Sua posição"), C_BORDER("World border", "Borda do mundo"),
 		SH_SQUARE("Square", "Quadrado"), SH_CIRCLE("Circle", "Círculo"),
 		CALC("Calculating...", "Calculando..."), NA("n/a", "n/d"), SPEED("%.1f chunks/s", "%.1f chunks/s"),

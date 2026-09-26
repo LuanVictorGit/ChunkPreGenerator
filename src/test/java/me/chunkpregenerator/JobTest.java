@@ -29,11 +29,15 @@ public class JobTest extends TestCase {
 		while (b.next()) { assertTrue(s.add(key(b.x, b.z))); b.done++; }
 		assertEquals(all, s); assertEquals(b.total, b.done); assertNull(Job.parse("broken"));
 	}
-	public void testReset() {
-		Job j = new Job("w", 0, 0, 2000, false); for (int i = 0; i < 50; i++) j.next();
-		j.ckCursor = j.cursor; j.ckDone = 50; for (int i = 0; i < 70; i++) j.next(); j.done = 120; j.inflight = 9; int e = j.epoch;
-		j.reset(); assertEquals(j.ckCursor, j.cursor); assertEquals(50, j.done); assertEquals(0, j.inflight); assertEquals(e + 1, j.epoch);
-		j.drain = true; assertFalse(j.checkpoint()); assertFalse(j.drain); j.next(); j.done++; assertTrue(j.checkpoint()); assertEquals(j.cursor, j.ckCursor); assertEquals(51, j.ckDone);
+	public void testWindowAndReset() {
+		Job j = new Job("w", 0, 0, 2000, false); long[] c = new long[5], s = new long[5];
+		for (int i = 0; i < 5; i++) { j.next(); c[i] = j.cursor; s[i] = j.push(); }
+		assertFalse(j.complete(s[1])); assertFalse(j.complete(s[3])); assertEquals(0, j.ckCursor); assertEquals(0, j.ckDone);
+		assertTrue(j.complete(s[0])); assertEquals(c[1], j.ckCursor); assertEquals(2, j.ckDone); assertTrue(j.complete(s[2])); assertEquals(c[3], j.ckCursor); assertEquals(4, j.ckDone);
+		for (int i = 0; i < 70; i++) j.next(); j.done = 75; j.inflight = 9; int e = j.epoch;
+		j.reset(); assertEquals(c[3], j.cursor); assertEquals(4, j.done); assertEquals(0, j.inflight); assertEquals(e + 1, j.epoch); assertEquals(j.head, j.tail);
+		for (int i = 0; i < 512; i++) { assertFalse(j.full()); j.next(); j.push(); }
+		assertTrue(j.full()); assertTrue(j.complete(j.head)); assertFalse(j.full()); assertEquals(5, j.ckDone);
 	}
 	public void testLegacyFuture() {
 		Job j = new Job("w", 40, -40, 600, false); Set<Long> all = run(new Job("w", 40, -40, 600, false)), seen = new HashSet<>();

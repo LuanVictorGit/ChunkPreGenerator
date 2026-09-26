@@ -12,5 +12,6 @@ public class CompatTest extends TestCase {
 	public void testLegacyLocale() {
 		Player p = EngineTest.proxy(Player.class, (x, m, a) -> m.getName().equals("spigot") ? new Player.Spigot() { public String getLocale() { return "pt_BR"; } } : EngineTest.def(m));
 		assertNotNull(Compat.LOCALE); assertEquals("pt_BR", Compat.locale(p)); assertEquals(Lang.PT, Lang.of(p)); assertNull(Compat.MSPT); assertEquals(-1.0, Compat.mspt());
+		assertNull(Compat.PAPER); assertNull(Compat.NMS); assertFalse(Compat.ASYNC); Compat.release(null, 0, 0);
 	}
 }

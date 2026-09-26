@@ -85,7 +85,7 @@ final class Menu implements InventoryHolder {
 			if (!Engine.JOBS.contains(j)) return;
 			m.set(4, icon(j.world), "§a" + j.world, g.t(L_STATUS, j.status(g)), null);
 			m.set(13, "EXPERIENCE_BOTTLE|EXP_BOTTLE", g.t(IT_BAR, j.percent()), g.t(L_BAR, bar(j.percent()), j.done, j.total, j.total - j.done), null);
-			m.set(20, "FEATHER", g.t(IT_SPEED), g.t(L_SPEED, j.speed(g), Compat.ASYNC != null ? j.inflight : j.state == Job.RUN ? Engine.batch : 0), null);
+			m.set(20, "FEATHER", g.t(IT_SPEED), g.t(L_SPEED, j.speed(g), Compat.ASYNC ? j.inflight : j.state == Job.RUN ? Engine.batch : 0), null);
 			m.set(21, CLOCK, g.t(IT_TIME), g.t(L_TIME, Lang.time(j.elapsed / 1000), j.eta(g)), null);
 			m.set(22, "COMPASS", g.t(IT_AREA), g.t(L_AREA_INFO, j.cx, j.cz, j.radius, shape(g, j)), null);
 			m.set(23, "REDSTONE", g.t(IT_PERF), Engine.perf(g), null);
